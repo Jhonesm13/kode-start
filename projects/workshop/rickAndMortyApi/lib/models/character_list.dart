@@ -59,6 +59,7 @@ class Result {
   final List<String> episode;
   final String url;
   final String created;
+  String? firstEpisodeName;
 
   Result({
     required this.id,
@@ -73,6 +74,7 @@ class Result {
     required this.episode,
     required this.url,
     required this.created,
+    this.firstEpisodeName,
   });
 
   factory Result.fromMap(Map<String, dynamic> map) {
@@ -89,6 +91,7 @@ class Result {
       episode: List<String>.from(map['episode'] ?? []),
       url: map['url'] ?? '',
       created: map['created'] ?? '',
+      firstEpisodeName: null,
     );
   }
 }

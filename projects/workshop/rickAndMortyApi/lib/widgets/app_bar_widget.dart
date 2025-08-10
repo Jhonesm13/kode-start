@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AppBarWidget extends StatelessWidget implements PreferredSizeWidget{
-  const AppBarWidget({super.key});
+  final bool isHomePage;
+  const AppBarWidget({super.key, this.isHomePage = false});
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +20,15 @@ class AppBarWidget extends StatelessWidget implements PreferredSizeWidget{
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(Icons.menu, color: Colors.white,),
+              GestureDetector(
+                onTap: () {
+                  if (!isHomePage) Navigator.pop(context);
+                },
+                child: Icon(
+                  isHomePage ? Icons.menu : Icons.arrow_back,
+                  color: Colors.white,
+                ),
+              ),
               Column(
                 children: [
                   Image.asset('assets/images/code_start_logo.png'),

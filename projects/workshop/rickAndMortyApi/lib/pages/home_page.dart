@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rick_and_morty_app/models/character_list.dart';
+import 'package:rick_and_morty_app/pages/details_page.dart';
 import 'package:rick_and_morty_app/repositories/character_repository.dart';
 import 'package:rick_and_morty_app/widgets/app_bar_widget.dart';
 import 'package:rick_and_morty_app/widgets/character_card.dart';
@@ -24,7 +25,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarWidget(),
+      backgroundColor: Colors.black,
+      appBar: AppBarWidget(isHomePage: true),
       body: FutureBuilder(future: characterList, builder: (context, snapshot) {
         if(snapshot.hasData){
           final data = snapshot.data;
@@ -32,26 +34,30 @@ class _HomePageState extends State<HomePage> {
           if(data == null) return Text('Nenhum personagem encontrado', style: TextStyle(color: Colors.red));
 
           return ListView.builder(
-            padding: EdgeInsets.all(8),
             itemCount: data.results.length,
             itemBuilder: (context, index) {
-              return CharacterCard(
-                character: data.results[index],
-                onTap: () {
-
-                },
+              return Padding(
+                padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                child: CharacterCard(
+                  character: data.results[index],
+                  onTap: () {
+                    Navigator.of(context).pushNamed(
+                      DetailsPage.routeId,
+                      arguments: data.results[index].id,
+                    );
+                  },
+                ),
               );
             },
           );
-        }
-        if (snapshot.hasError) {
-        return Text(
-          'Erro: ${snapshot.error}',
-           style: TextStyle(color: Colors.red),
-        );
-      }
+        } else if (snapshot.hasError) {
+            return Text(
+              'Erro: ${snapshot.error}',
+              style: TextStyle(color: Colors.red),
+            );
+          }
 
-       return CircularProgressIndicator();
+        return const Center(child: CircularProgressIndicator());
       }),
     );
   }
