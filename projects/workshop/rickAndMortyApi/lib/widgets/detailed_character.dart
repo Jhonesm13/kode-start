@@ -84,6 +84,10 @@ class DetailedCharacterCard extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _getStatusColor(detailedCharacter.status),
                             shape: BoxShape.circle,
+                            border: Border.all(
+                              color: Colors.white,
+                              width: 1,
+                            ),
                           ),
                         ),
                         const SizedBox(width: 8.0),

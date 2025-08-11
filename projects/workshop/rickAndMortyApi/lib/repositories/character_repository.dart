@@ -1,4 +1,3 @@
-// character_repository.dart
 import 'package:dio/dio.dart';
 import 'package:rick_and_morty_app/models/character_list.dart';
 
@@ -9,10 +8,20 @@ class CharacterRepository {
     ),
   );
 
-  static Future<CharacterListModel> getCharacters() async {
-    final response = await _dio.get('/character?page=2');
-    return CharacterListModel.fromMap(response.data);
-  }
+  static Future<List<Result>> getCharacters() async {
+    List<Result> allCharacters = [];
+    String? nextPageUrl = '/character'; 
+
+    while (nextPageUrl != null) {
+      final response = await _dio.get(nextPageUrl);
+      final CharacterListModel characterList = CharacterListModel.fromMap(response.data);
+
+      allCharacters.addAll(characterList.results);
+      nextPageUrl = characterList.info.next; 
+    }
+    
+    return allCharacters;
+}
 
   static Future<Result> getDetailedCharacterWithFirstEpisodeName(int characterId) async {
     final characterResponse = await _dio.get("/character/$characterId");

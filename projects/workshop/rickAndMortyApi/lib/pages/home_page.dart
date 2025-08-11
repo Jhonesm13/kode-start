@@ -14,12 +14,37 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<CharacterListModel>? characterList;
+  List<Result> allCharacters = [];
+  List<Result> filteredCharacters = [];
+  bool isLoading = true;
+  String searchQuery = "";
 
   @override
   void initState() {
-    characterList = CharacterRepository.getCharacters();
     super.initState();
+    _loadCharacters();
+  }
+
+  Future<void> _loadCharacters() async {
+    final characters = await CharacterRepository.getCharacters();
+    setState(() {
+      allCharacters = characters;
+      filteredCharacters = characters;
+      isLoading = false;
+    });
+  }
+
+  void _filterCharacters(String query) {
+    final filtered = allCharacters.where((character) {
+      final nameLower = character.name.toLowerCase();
+      final queryLower = query.toLowerCase();
+      return nameLower.contains(queryLower);
+    }).toList();
+
+    setState(() {
+      searchQuery = query;
+      filteredCharacters = filtered;
+    });
   }
 
   @override
@@ -27,38 +52,56 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBarWidget(isHomePage: true),
-      body: FutureBuilder(future: characterList, builder: (context, snapshot) {
-        if(snapshot.hasData){
-          final data = snapshot.data;
-
-          if(data == null) return Text('Nenhum personagem encontrado', style: TextStyle(color: Colors.red));
-
-          return ListView.builder(
-            itemCount: data.results.length,
-            itemBuilder: (context, index) {
-              return Padding(
-                padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
-                child: CharacterCard(
-                  character: data.results[index],
-                  onTap: () {
-                    Navigator.of(context).pushNamed(
-                      DetailsPage.routeId,
-                      arguments: data.results[index].id,
-                    );
-                  },
+      body: isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
+            children: [
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                  child: TextField(
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      hintText: 'Search a Character',
+                      hintStyle: const TextStyle(color: Colors.white),
+                      prefixIcon: const Icon(Icons.search, color: Colors.white),
+                      filled: true,
+                      fillColor: Color(0xFF1C1B1F),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(10)),
+                        borderSide: BorderSide.none,
+                      ),
+                    ),
+                    onChanged: _filterCharacters,
+                  ),
                 ),
-              );
-            },
-          );
-        } else if (snapshot.hasError) {
-            return Text(
-              'Erro: ${snapshot.error}',
-              style: TextStyle(color: Colors.red),
-            );
-          }
-
-        return const Center(child: CircularProgressIndicator());
-      }),
+                Expanded(
+                  child: filteredCharacters.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'Nenhum personagem encontrado',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        )
+                      : ListView.builder(
+                          itemCount: filteredCharacters.length,
+                          itemBuilder: (context, index) {
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 15, 20, 0),
+                              child: CharacterCard(
+                                character: filteredCharacters[index],
+                                onTap: () {
+                                  Navigator.of(context).pushNamed(
+                                    DetailsPage.routeId,
+                                    arguments: filteredCharacters[index].id,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                        ),
+                ),
+              ],
+            ),
     );
   }
 }
